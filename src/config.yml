@@ -608,6 +608,9 @@ compatibility-blockregen: false
 # Toggle compatibility with Prism
 compatibility-prism: true
 
+# Toggle compatibility with AuroraCollections
+compatibility-auroracollections: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}

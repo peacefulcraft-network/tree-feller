@@ -38,6 +38,7 @@ public class TreeFellerCompat{
         compatibilities.add(new AuraSkillsCompat());
         compatibilities.add(new BlockRegenCompat());
         compatibilities.add(new PrismCompat());
+        compatibilities.add(new AuroraCollectionsCompat());
     }
     public static void init(TreeFeller treefeller){
         if(treefeller!=null){
