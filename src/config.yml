@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.28.0
+# Version 1.28.1
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -722,6 +722,7 @@ compatibility-prism: true
 tools:
     - WOODEN_AXE
     - STONE_AXE
+    - COPPER_AXE
     - IRON_AXE
     - GOLDEN_AXE
     - DIAMOND_AXE

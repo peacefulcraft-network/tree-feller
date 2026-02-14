@@ -218,6 +218,7 @@ public class ConfigGenerator{
             add("tools:");
             add("    - WOODEN_AXE");
             add("    - STONE_AXE");
+            add("    - COPPER_AXE");
             add("    - IRON_AXE");
             add("    - GOLDEN_AXE");
             add("    - DIAMOND_AXE");
