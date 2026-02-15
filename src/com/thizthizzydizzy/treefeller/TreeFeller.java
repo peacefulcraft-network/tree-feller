@@ -815,16 +815,8 @@ public class TreeFeller extends JavaPlugin{
                     }
                     if(Option.STARTUP_LOGS.isTrue())effect.print(logger);
                     this.effects.add(effect);
-                }else if(o instanceof String){
-                    Material m = Material.matchMaterial((String)o);
-                    if(m==null){
-                        log(logger, source, Level.WARNING, "Unknown material: {0}; Skipping...", o);
-                    }
-                    Tool tool = new Tool(m);
-                    if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
-                    this.tools.add(tool);
                 }else{
-                    log(logger, source, Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
+                    log(logger, source, Level.INFO, "Unknown effect declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
                 }
             }
         }
@@ -961,6 +953,7 @@ public class TreeFeller extends JavaPlugin{
                 Material m = Material.matchMaterial((String)o);
                 if(m==null){
                     log(logger, source, Level.WARNING, "Unknown material: {0}; Skipping...", o);
+                    continue;
                 }
                 Tool tool = new Tool(m);
                 if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
