@@ -41,6 +41,7 @@ public class TreeFellerCompat{
         compatibilities.add(new Prism3Compat());
         compatibilities.add(new Prism4Compat());
         compatibilities.add(new AuroraCollectionsCompat());
+        compatibilities.add(new QuestsCompat());
     }
     public static void init(TreeFeller treefeller){
         if(treefeller!=null){
