@@ -4,9 +4,9 @@ import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.treefeller.TreeFeller;
 import java.util.List;
-import me.botsko.prism.Prism;
-import me.botsko.prism.actionlibs.ActionFactory;
-import me.botsko.prism.listeners.PrismBlockEvents;
+import network.darkhelmet.prism.Prism;
+import network.darkhelmet.prism.actionlibs.ActionFactory;
+import network.darkhelmet.prism.listeners.PrismBlockEvents;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Item;
@@ -14,12 +14,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
-public class PrismCompat extends InternalCompatibility{
+public class Prism3Compat extends InternalCompatibility{
     private Prism prism;
     private PrismBlockEvents prismBlockEvents;
     @Override
     public String getPluginName(){
         return "Prism";
+    }
+    @Override
+    public String getPluginPackageFilter(){
+        return "network.darkhelmet.prism";
+    }
+    @Override
+    public String getCompatibilityName(){
+        return "Prism 3";
     }
     @Override
     public void init(TreeFeller treeFeller){

@@ -45,6 +45,9 @@ public abstract class PluginCompatibility{
     public String getCompatibilityName(){
         return getPluginName();
     }
+    public String getPluginPackageFilter(){
+        return null;
+    }
     public abstract String getPluginName();
     /**
      * Called when a block is removed, but not broken, such as when a tree falls over
@@ -133,6 +136,10 @@ public abstract class PluginCompatibility{
         return Bukkit.getPluginManager().getPlugin(getPluginName());
     }
     public boolean isInstalled() {
-        return getPlugin()!=null&&getPlugin().isEnabled();
+        Plugin plugin = getPlugin();
+        if(plugin==null)return false;
+        String filter = getPluginPackageFilter();
+        if(filter!=null&&!filter.equals(plugin.getClass().getPackageName()))return false;
+        return plugin.isEnabled();
     }
 }

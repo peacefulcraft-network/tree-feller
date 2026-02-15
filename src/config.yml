@@ -605,8 +605,14 @@ compatibility-auraskills: true
 # Toggle compatibility with BlockRegen
 compatibility-blockregen: false
 
-# Toggle compatibility with Prism
-compatibility-prism: true
+# Toggle compatibility with Prism 2
+compatibility-prism-2: true
+
+# Toggle compatibility with Prism 3
+compatibility-prism-3: true
+
+# Toggle compatibility with Prism 4
+compatibility-prism-4: true
 
 # Toggle compatibility with AuroraCollections
 compatibility-auroracollections: true
