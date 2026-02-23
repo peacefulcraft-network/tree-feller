@@ -1,13 +1,8 @@
 /build/
 /dist/
 /nbproject/private/
-/Bukkit/
-/Forge/
-/Connector/
-/Neoforge/
+/Libraries/
+/Platform/
 /Architect/
 /Builder/
-/Config/
-/Fabric/
 /Core/
-/Sponge/
