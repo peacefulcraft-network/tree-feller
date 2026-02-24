@@ -55,18 +55,23 @@ public class FallingTreeBlock{
                 plugin.fallingBlocks.remove(this);
                 return;
             }
-            ArrayList<ItemStack> drops = plugin.getDrops(event.getTo(), tool, tree, axe, event.getBlock(), xp, modifiers);
+            ArrayList<FancyItemStack> drops = plugin.getDrops(event.getTo(), tool, tree, axe, event.getBlock(), xp, modifiers);
             if(doBreak){
                 event.setCancelled(true);
-                for(ItemStack drop : drops){
-                    plugin.dropItem(detectedTree, player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop));
+                for(FancyItemStack drop : drops){
+                    plugin.dropItem(detectedTree, player, event.getBlock().getWorld(), event.getEntity().getLocation(), drop);
                 }
                 plugin.dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
             }
             if(player!=null){
                 event.setCancelled(true);
-                for(ItemStack drop : drops){
-                    for(ItemStack stack : player.getInventory().addItem(drop).values())plugin.dropItem(detectedTree, player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
+                for(FancyItemStack drop : drops){
+                    if(drop.nbt!=null){
+                        // no easy reliable way to modify item data outside of as an entity (thanks to item components in newer versions)
+                        plugin.dropItem(detectedTree, player, event.getBlock().getWorld(), player.getLocation(), drop);
+                        continue;
+                    }
+                    for(ItemStack stack : player.getInventory().addItem(drop.stack).values())plugin.dropItem(detectedTree, player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
                 }
                 player.giveExp(xp[0]);
             }

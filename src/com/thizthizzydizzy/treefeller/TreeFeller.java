@@ -3,6 +3,7 @@ import com.thizthizzydizzy.treefeller.compat.TestResult;
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import com.thizthizzydizzy.treefeller.decoration.DecorationDetector;
 import com.thizthizzydizzy.treefeller.menu.MenuTreesConfiguration;
+import com.thizthizzydizzy.vanillify.Vanillify;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,7 +116,7 @@ public class TreeFeller extends JavaPlugin{
      * @param dropItems weather or not to drop items
      * @return the items that would have been dropped. <b>This is not the actual dropped items, but possible dropped items</b> Returns null if the tree was not felled.
      */
-    public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, boolean dropItems){
+    public ArrayList<FancyItemStack> fellTree(Block block, Player player, ItemStack axe, boolean dropItems){
         ItemMeta meta = axe.hasItemMeta()?axe.getItemMeta():null;
         boolean unbreakable = meta!=null&&meta.isUnbreakable();
         DetectedTree detectedTree = detectTree(block, player, axe, (testTree) -> {
@@ -248,7 +249,7 @@ public class TreeFeller extends JavaPlugin{
             }
         }
         //now the blocks
-        ArrayList<ItemStack> droppedItems = new ArrayList<>();
+        ArrayList<FancyItemStack> droppedItems = new ArrayList<>();
         final int t = total;
         long seed = new Random().nextLong();
         ArrayList<Integer> distances = new ArrayList<>(detectedTree.trunk.keySet());
@@ -1071,9 +1072,9 @@ public class TreeFeller extends JavaPlugin{
         }
     }
     public boolean cascading = false;
-    public ArrayList<ItemStack> tryCascade(Block block, Player player, ItemStack axe, boolean dropItems){
+    public ArrayList<FancyItemStack> tryCascade(Block block, Player player, ItemStack axe, boolean dropItems){
         cascading = true;
-        ArrayList<ItemStack> ret = fellTree(block, player, axe, dropItems);
+        ArrayList<FancyItemStack> ret = fellTree(block, player, axe, dropItems);
         cascading = false;
         return ret;
     }
@@ -1083,9 +1084,9 @@ public class TreeFeller extends JavaPlugin{
     int randbetween(int min, int max){
         return new Random().nextInt(max-min+1)+min;
     }
-    Collection<? extends ItemStack> getDropsWithBonus(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp, List<Modifier> modifiers){
+    Collection<? extends FancyItemStack> getDropsWithBonus(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp, List<Modifier> modifiers){
         if(xp.length!=1)throw new IllegalArgumentException("xp must be an array of size 1!");
-        ArrayList<ItemStack> drops = new ArrayList<>();
+        ArrayList<FancyItemStack> drops = new ArrayList<>();
         double dropChance = tree.trunk.contains(block.getType())?Option.LOG_DROP_CHANCE.get(tool, tree):Option.LEAF_DROP_CHANCE.get(tool, tree);
         for(Modifier mod : modifiers){
             dropChance = mod.apply(dropChance, tree, block);
@@ -1105,12 +1106,12 @@ public class TreeFeller extends JavaPlugin{
         }
         return drops;
     }
-    Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
+    Collection<FancyItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
         if(xp.length!=1)throw new IllegalArgumentException("blockXP must be an array of length 1!");
         if(exp.containsKey(block.getType())){
             xp[0] += randbetween(exp.get(block.getType()));
         }
-        ArrayList<ItemStack> drops = new ArrayList<>();
+        ArrayList<FancyItemStack> drops = new ArrayList<>();
         boolean fortune, silk;
         if(tree.trunk.contains(block.getType())){
             fortune = Option.LOG_FORTUNE.get(tool, tree);
@@ -1125,16 +1126,30 @@ public class TreeFeller extends JavaPlugin{
             List<ItemStack> drop = new ArrayList<>(block.getDrops(axe));
             //Test if silk touch drops the base item, and if so, use it.
             if(drop.size()==1&&drop.get(0).getType()==block.getType()){
-                drops.addAll(drop);
+                for(ItemStack is : drop){
+                    drops.add(new FancyItemStack(is));
+                }
                 return drops;
             }
         }
-        if(fortune&&!axe.containsEnchantment(Enchantment.SILK_TOUCH))drops.addAll(block.getDrops(axe));
-        else drops.addAll(block.getDrops());
+        if(fortune&&!axe.containsEnchantment(Enchantment.SILK_TOUCH)){
+            for(ItemStack is : block.getDrops(axe)){
+                drops.add(new FancyItemStack(is));
+            }
+        }
+        else{
+            for(ItemStack is : block.getDrops()){
+                drops.add(new FancyItemStack(is));
+            }
+        }
         HashMap<Material, Material> conversions = Option.DROP_CONVERSIONS.get(tool, tree);
         if(!conversions.isEmpty()){
-            for(ItemStack s : drops){
-                if(conversions.containsKey(s.getType()))s.setType(conversions.get(s.getType()));
+            for(FancyItemStack s : drops){
+                Material typ = s.stack.getType();
+                if(conversions.containsKey(typ)){
+                    s.stack.setType(conversions.get(typ));
+                    s.nbt = Option.dropConversionNBT.get(typ);
+                }
             }
         }
         return drops;
@@ -1164,12 +1179,12 @@ public class TreeFeller extends JavaPlugin{
             }
         }
     }
-    ArrayList<ItemStack> getDrops(Material m, Tool tool, Tree tree, ItemStack axe, Block location, int[] xp, List<Modifier> modifiers){
-        ArrayList<ItemStack> drops = new ArrayList<>();
+    ArrayList<FancyItemStack> getDrops(Material m, Tool tool, Tree tree, ItemStack axe, Block location, int[] xp, List<Modifier> modifiers){
+        ArrayList<FancyItemStack> drops = new ArrayList<>();
         if(!m.isBlock())return drops;
         Block block = findAir(location);
         if(block==null){
-            drops.add(new ItemStack(m));
+            drops.add(new FancyItemStack(new ItemStack(m)));
             return drops;
         }
         block.setType(m);
@@ -1456,6 +1471,16 @@ public class TreeFeller extends JavaPlugin{
         }
         item.setItemStack(stack);
         TreeFellerCompat.dropItem(this, player, item);
+    }
+    @Deprecated // see Option.DROP_CONVERSIONS
+    public void dropItem(DetectedTree detectedTree, Player player, Block block, FancyItemStack stack){
+        dropItem(detectedTree, player, block.getWorld(), block.getLocation(), stack);
+    }
+    @Deprecated // see Option.DROP_CONVERSIONS
+    public void dropItem(DetectedTree detectedTree, Player player, World world, Location location, FancyItemStack stack){
+        Item item = world.dropItemNaturally(location, stack.stack);
+        if(stack.nbt!=null)Vanillify.mergeEntityNBT(item, "{Item:"+stack.nbt+"}");
+        dropItem(detectedTree, player, item);
     }
     public boolean isToggledOn(Player player){
         boolean inverted = Option.DEFAULT_ENABLED.isTrue();

@@ -2252,6 +2252,8 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.OAK_LOG);
         }
     };
+    @Deprecated // temporary hacked-in solution; this will be properly implemented in v2
+    public static HashMap<Material, String> dropConversionNBT = new HashMap<>();
     public static Option<HashMap<Material, Material>> DROP_CONVERSIONS = new Option<HashMap<Material, Material>>("Drop Conversions", true, true, true, buildMaterialMap(defaultDropConversions), buildMaterialMapString(defaultDropConversions)){
         @Override
         public String writeToConfig(HashMap<Material, Material> value){
@@ -2260,7 +2262,9 @@ public abstract class Option<E>{
             ArrayList<Material> keys = new ArrayList<>(value.keySet());
             Collections.sort(keys);
             for(Material m : keys){
-                s+="\n    "+m.toString()+": "+value.get(m).toString();
+                String nbt = dropConversionNBT.get(m);
+                s+="\n    "+m.toString()+": "+(nbt!=null?"'":"")+value.get(m).toString();
+                if(nbt!=null)s+=nbt+"'";
             }
             return s;
         }
@@ -2284,7 +2288,8 @@ public abstract class Option<E>{
                 MemorySection m = (MemorySection)o;
                 HashMap<Material, Material> conversions = new HashMap<>();
                 for(String key : m.getKeys(false)){
-                    conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
+                    Material from = loadMaterial(key);
+                    conversions.put(from, loadMaterial(m.get(key), from, dropConversionNBT));
                 }
                 conversions.remove(null);
                 return conversions;
@@ -2295,7 +2300,8 @@ public abstract class Option<E>{
                 for(Object okey : m.keySet()){
                     if(okey instanceof String){
                         String key = (String)okey;
-                        conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
+                        Material from = loadMaterial(key);
+                        conversions.put(from, loadMaterial(m.get(key), from, dropConversionNBT));
                     }
                 }
                 conversions.remove(null);
@@ -2308,7 +2314,8 @@ public abstract class Option<E>{
                     if(ob instanceof MemorySection){
                         MemorySection m = (MemorySection)ob;
                         for(String key : m.getKeys(false)){
-                            conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
+                            Material from = loadMaterial(key);
+                            conversions.put(from, loadMaterial(m.get(key), from, dropConversionNBT));
                         }
                     }
                 }
@@ -4794,6 +4801,16 @@ public abstract class Option<E>{
         if(o instanceof Material)return (Material)o;
         if(o instanceof String)return Material.matchMaterial((String)o);
         return null;
+    }
+    @Deprecated // see above DROP_CONVERSIONS
+    public static Material loadMaterial(Object o, Material nbtKey, HashMap<Material, String> nbtMap){
+        if(o instanceof String&&((String)o).contains("{")){
+            String str = (String)o;
+            int nbtIndex = str.indexOf('{');
+            nbtMap.put(nbtKey, str.substring(nbtIndex));
+            return loadMaterial(str.substring(0, nbtIndex));
+        }
+        return loadMaterial(o);
     }
     public ArrayList<E> loadList(Object o){
         if(o instanceof Iterable){

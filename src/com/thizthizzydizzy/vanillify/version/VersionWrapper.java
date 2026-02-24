@@ -6,4 +6,5 @@ public interface VersionWrapper{
     void modifyEntityNBT(Entity entity, String tag, Object value);
     float getEntityNBTFloat(Entity entity, String tag);
     int getEntityNBTInt(Entity entity, String tag);
+    void mergeEntityNBT(Entity entity, String nbt);
 }

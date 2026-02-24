@@ -17,4 +17,7 @@ public class Vanillify{
     public static Object getEntityNBTInt(Entity entity, String tag){
         return WRAPPER.getEntityNBTInt(entity, tag);
     }
+    public static void mergeEntityNBT(Entity entity, String nbt){
+        WRAPPER.mergeEntityNBT(entity, nbt);
+    }
 }

@@ -1,7 +1,6 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.vanillify.Vanillify;
 import java.util.ArrayList;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -17,8 +16,8 @@ public enum FellBehavior{
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             if(dropItems){
                 int[] xp = new int[]{0};
-                for(ItemStack s : plugin.getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
-                    plugin.dropItem(detectedTree, player, block.getWorld().dropItemNaturally(block.getLocation(), s));
+                for(FancyItemStack s : plugin.getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
+                    plugin.dropItem(detectedTree, player, block, s);
                 }
                 plugin.dropExp(block.getWorld(), block.getLocation(), xp[0]);
             }
@@ -35,8 +34,13 @@ public enum FellBehavior{
             if(player==null)BREAK.breakBlock(detectedTree, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
             if(dropItems){
                 int[] xp = new int[]{0};
-                for(ItemStack s : plugin.getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
-                    for(ItemStack st : player.getInventory().addItem(s).values()){
+                for(FancyItemStack s : plugin.getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
+                    if(s.nbt!=null){
+                        // no easy reliable way to modify item data outside of as an entity (thanks to item components in newer versions)
+                        plugin.dropItem(detectedTree, player, block, s);
+                        continue;
+                    }
+                    for(ItemStack st : player.getInventory().addItem(s.stack).values()){
                         plugin.dropItem(detectedTree, player, block.getWorld().dropItemNaturally(block.getLocation(), st));
                     }
                 }
