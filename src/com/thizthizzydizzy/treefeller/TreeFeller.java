@@ -207,6 +207,19 @@ public class TreeFeller extends JavaPlugin{
             int totalLeaves = getTotal(detectedTree.leaves);
             int logCount = Math.min(totalLogs, total);
             
+            // --- SCOREBOARD PIPELINE START ---
+            if (player != null && logCount > 0) {
+                int finalLogCount = logCount; 
+                Player finalPlayer = player;
+                
+                // It's safest to run commands on the main server thread
+                Bukkit.getScheduler().runTask(this, () -> {
+                    String cmd = String.format("scoreboard players add %s wood_broken %d", finalPlayer.getName(), finalLogCount);
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd);
+                });
+            }
+            // --- SCOREBOARD PIPELINE END ---
+            
             // This is not accurate to the number of leaves that were actually broken, but it is better than what was here before (which always assumed the whole tree was broken, even for partial felling)
             int leafCount = totalLogs == 0 ? totalLeaves : (int)Math.ceil((double)totalLeaves * logCount / totalLogs);
             
